@@ -38,7 +38,7 @@
   "network": {
     "mode": "default"
   },
-  "website": "https://github.com/thomasfr/hass-addons/blob/main/amazon-s3-backup/README.md",
-  "issue_tracker": "https://github.com/thomasfr/hass-addons/issues",
-  "source_url": "https://github.com/thomasfr/hass-addons/tree/main/amazon-s3-backup"
+  "website": "https://github.com/watsonpaul80/hassio-addons/blob/main/README.md",
+  "issue_tracker": "https://github.com/watsonpaul80/hassio-addons/issues",
+  "source_url": "https://github.com/watsonpaul80/hassio-addons/tree/main/amazon-s3-backup"
 }
