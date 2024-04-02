@@ -5,7 +5,8 @@ ENV LANG C.UTF-8
 COPY run.sh /
 
 RUN chmod a+x /run.sh && \
-    apk add --no-cache \
+    apk add -v --update --no-cache \
+      coreutils \
       python3 \
       py3-pip \
       groff \
