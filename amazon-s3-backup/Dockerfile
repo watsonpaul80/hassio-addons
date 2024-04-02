@@ -1,19 +1,20 @@
-ARG BUILD_FROM
-FROM ${BUILD_FROM}
+FROM alpine:3.17
 
 ENV LANG C.UTF-8
 
 COPY run.sh /
-RUN chmod a+x /run.sh
 
-# add aws-cli and deps
-RUN apk add -v --update --no-cache \
-        python3 \
-        py3-pip \
-        groff \
-        less \
-        jq \
-        && \
-    pip3 install --upgrade awscli
-    
-CMD [ "/run.sh" ]  
+RUN chmod a+x /run.sh && \
+    apk add --no-cache \
+      python3 \
+      py3-pip \
+      groff \
+      less \
+      jq && \
+    pip3 install --no-cache-dir --upgrade awscli
+
+LABEL maintainer="Paul Watson watsonpaul80@gmail.com" \
+      version="1.0" \
+      description="Amazon S3 Backup Addon for Home Assistant"
+
+CMD ["/run.sh"]
