@@ -43,5 +43,3 @@ panel_icon: mdi:server-network
 panel_title: MinIO
 
 ingress: false
-
-startup_script: run.sh
