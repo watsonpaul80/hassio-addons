@@ -22,7 +22,7 @@ schema:
   secret_key: str?
   port: int
   console_port: int
-image: "docker.io/minio/minio:latest"
+image: "minio/minio:latest"
 map:
   - config:rw
   - ssl
@@ -42,6 +42,5 @@ arch:
 panel_icon: mdi:server-network
 panel_title: MinIO
 ingress: false
-webui: http://[PROTO:HTTP]://[HOST]:[PORT:9001]
 
 
