@@ -1,4 +1,5 @@
-#!/usr/bin/with-contenv bashio
+#!/usr/bin/env bash
+source /usr/lib/bashio.sh
 
 # Load config values
 PORT=$(bashio::config 'port')
