@@ -1,5 +1,10 @@
 {
-    "name": "Paul Watson Home Assistant Addons",
-    "url": "https://github.com/watsonpaul80/hassio-addons",
-    "maintainer": "Paul Watson watsonpaul80@gmail.com"
+  "name": "Paul Watson Home Assistant Addons",
+  "url": "https://github.com/watsonpaul80/hassio-addons",
+  "maintainer": "Paul Watson <watsonpaul80@googlemail.com>",
+  "addons": [
+    "amazon-s3-backup",
+    "telegram_forwarder",
+    "MinIO"
+  ]
 }
