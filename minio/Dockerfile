@@ -6,15 +6,11 @@ ENV LANG C.UTF-8
 RUN apk add --no-cache bash curl jq
 
 # Detect architecture at runtime using uname
-RUN ARCH=$(uname -m) && \
-    case "$ARCH" in \
-      "aarch64") MINIO_ARCH="arm64" ;; \
-      "x86_64")  MINIO_ARCH="amd64" ;; \
-      *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
-    esac && \
-    curl -sSLO "https://dl.min.io/server/minio/release/linux-${MINIO_ARCH}/minio" && \
+RUN ARCH=$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/') && \
+    curl -sSLO "https://dl.min.io/server/minio/release/linux-${ARCH}/minio" && \
     chmod +x minio && \
     mv minio /usr/local/bin/
+
 
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
