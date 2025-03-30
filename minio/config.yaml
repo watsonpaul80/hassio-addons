@@ -22,7 +22,7 @@ schema:
   secret_key: str?
   port: int
   console_port: int
-image: "quay.io/minio/minio:latest"
+image: "minio/minio:latest"
 map:
   - config:rw
   - ssl
@@ -42,4 +42,5 @@ arch:
 panel_icon: mdi:server-network
 panel_title: MinIO
 ingress: false
-webui: http://[HOST]:9001
+webui: http://localhost:9001
+
