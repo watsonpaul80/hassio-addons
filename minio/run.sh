@@ -22,5 +22,5 @@ echo "[INFO] Starting MinIO in Ingress mode"
 echo "[INFO] Login with username: $USERNAME"
 
 exec minio server /data \
-  --address "127.0.0.1:${PORT}" \
-  --console-address "127.0.0.1:${CONSOLE_PORT}"
+  --address ":${PORT}" \
+  --console-address ":${CONSOLE_PORT}"
