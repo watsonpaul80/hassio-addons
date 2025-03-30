@@ -22,7 +22,6 @@ schema:
   secret_key: str?
   port: int
   console_port: int
-image: "minio/minio:latest"
 map:
   - config:rw
   - ssl
