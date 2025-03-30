@@ -1,0 +1,47 @@
+name: MinIO
+version: "1.0.0"
+description: High performance, self-hosted S3 storage server for backups and object storage
+slug: minio
+startup: services
+boot: auto
+init: false
+homeassistant_api: false
+host_network: true
+privileged:
+  - NET_ADMIN
+  - SYS_ADMIN
+options:
+  generate_keys: true
+  access_key: ""
+  secret_key: ""
+  port: 9000
+  console_port: 9001
+schema:
+  generate_keys: bool
+  access_key: str?
+  secret_key: str?
+  port: int
+  console_port: int
+image: "docker.io/minio/minio:latest"
+map:
+  - config:rw
+  - ssl
+  - addons:rw
+  - backup:rw
+  - share:rw
+  - media:rw
+
+ports:
+  "9000/tcp": 9000
+  "9001/tcp": 9001
+
+arch:
+  - aarch64
+  - amd64
+
+panel_icon: mdi:server-network
+panel_title: MinIO
+
+ingress: false
+
+startup_script: run.sh
