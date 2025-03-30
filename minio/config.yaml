@@ -22,7 +22,7 @@ schema:
   secret_key: str?
   port: int
   console_port: int
-image: "docker.io/minio/minio:latest"
+image: "minio/minio:latest"
 map:
   - config:rw
   - ssl
