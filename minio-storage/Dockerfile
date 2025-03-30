@@ -5,8 +5,8 @@ ENV LANG C.UTF-8
 
 RUN apk add --no-cache bash curl jq
 
-# Detect architecture using uname in a single shell execution block
-RUN sh -c '
+# Use uname inside a shell
+RUN bash -c '\
   ARCH=$(uname -m); \
   if [ "$ARCH" = "aarch64" ]; then MINIO_ARCH="arm64"; \
   elif [ "$ARCH" = "x86_64" ]; then MINIO_ARCH="amd64"; \
@@ -14,7 +14,7 @@ RUN sh -c '
   echo "✅ Downloading MinIO for $MINIO_ARCH"; \
   curl -sSLO https://dl.min.io/server/minio/release/linux-${MINIO_ARCH}/minio && \
   chmod +x minio && \
-  mv minio /usr/local/bin/'
+  mv minio /usr/local/bin/minio'
 
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
