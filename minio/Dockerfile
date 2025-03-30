@@ -5,8 +5,8 @@ ENV LANG C.UTF-8
 
 RUN apk add --no-cache bash curl jq
 
-# Detect and download MinIO binary based on actual architecture
-RUN sh -c '\
+# Detect architecture using uname in a single shell execution block
+RUN sh -c '
   ARCH=$(uname -m); \
   if [ "$ARCH" = "aarch64" ]; then MINIO_ARCH="arm64"; \
   elif [ "$ARCH" = "x86_64" ]; then MINIO_ARCH="amd64"; \
