@@ -3,29 +3,48 @@ set -e
 
 CONFIG_PATH=/data/options.json
 
-USERNAME=$(jq -r '.username' "$CONFIG_PATH")
-PASSWORD=$(jq -r '.password' "$CONFIG_PATH")
+USERNAME=$(jq -r '.username // empty' "$CONFIG_PATH")
+PASSWORD=$(jq -r '.password // empty' "$CONFIG_PATH")
+ACCESS_KEY=$(jq -r '.access_key // empty' "$CONFIG_PATH")
+SECRET_KEY=$(jq -r '.secret_key // empty' "$CONFIG_PATH")
 PORT=$(jq -r '.port' "$CONFIG_PATH")
 CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
-GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
 STORAGE_PATH=$(jq -r '.storage_path // "/data/minio"' "$CONFIG_PATH")
+ENABLE_SSL=$(jq -r '.enable_ssl' "$CONFIG_PATH")
+GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
 
-if [[ "$GENERATE_KEYS" == "true" && ( -z "$USERNAME" || -z "$PASSWORD" ) ]]; then
-    echo "[INFO] Generating random credentials..."
-    USERNAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
-    PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
+# Fallback to access_key/secret_key if username/password not provided
+if [[ -z "$USERNAME" && -n "$ACCESS_KEY" ]]; then
+  USERNAME="$ACCESS_KEY"
+  PASSWORD="$SECRET_KEY"
 fi
 
+# Auto-generate credentials if required
+if [[ "$GENERATE_KEYS" == "true" && ( -z "$USERNAME" || -z "$PASSWORD" ) ]]; then
+  echo "[INFO] Generating random credentials..."
+  USERNAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
+  PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
+fi
+
+# Export credentials
 export MINIO_ROOT_USER="${USERNAME}"
 export MINIO_ROOT_PASSWORD="${PASSWORD}"
-export MINIO_BROWSER_REDIRECT_URL="/hassio/ingress/$(basename "$(dirname "$0")")"
 
-echo "[INFO] Storage path: $STORAGE_PATH"
-mkdir -p "$STORAGE_PATH"
+# SSL support
+CERTS_FLAG=""
+if [[ "$ENABLE_SSL" == "true" ]]; then
+  CERTS_FLAG="--certs-dir /ssl"
+  echo "[INFO] SSL enabled, using certs from /ssl"
+fi
 
-echo "[INFO] Starting MinIO in Ingress mode"
-echo "[INFO] Login with username: $USERNAME"
+# Log summary
+echo "[INFO] Starting MinIO"
+echo "[INFO] Access Key: $USERNAME"
+echo "[INFO] Port: $PORT"
+echo "[INFO] Console: $CONSOLE_PORT"
+echo "[INFO] Data Dir: $STORAGE_PATH"
 
 exec minio server "$STORAGE_PATH" \
-  --address ":${PORT}" \
-  --console-address ":${CONSOLE_PORT}"
+  --address "0.0.0.0:${PORT}" \
+  --console-address "0.0.0.0:${CONSOLE_PORT}" \
+  $CERTS_FLAG
