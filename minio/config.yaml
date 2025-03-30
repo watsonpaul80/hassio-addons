@@ -41,4 +41,5 @@ arch:
 panel_icon: mdi:server-network
 panel_title: MinIO
 ingress: false
-webui: http://homeassistant.local:9001
+webui: http://[HOST]:9001
+
