@@ -9,6 +9,7 @@ PORT=$(jq -r '.port' "$CONFIG_PATH")
 CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
 GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
 
+# Generate random credentials if enabled
 if [[ "$GENERATE_KEYS" == "true" && ( -z "$USERNAME" || -z "$PASSWORD" ) ]]; then
     echo "[INFO] Generating random credentials..."
     USERNAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
@@ -18,11 +19,10 @@ fi
 export MINIO_ROOT_USER="${USERNAME}"
 export MINIO_ROOT_PASSWORD="${PASSWORD}"
 
-# Ingress Path Detection (Fallback)
-if [[ -z "$MINIO_BROWSER_REDIRECT_URL" ]]; then
-    INGRESS_SLUG=$(basename "$(dirname "$(realpath "$0")")")
-    export MINIO_BROWSER_REDIRECT_URL="/hassio/ingress/${INGRESS_SLUG}"
-    echo "[INFO] Auto-set MINIO_BROWSER_REDIRECT_URL to $MINIO_BROWSER_REDIRECT_URL"
+# Optional: Set a browser redirect only if a proper URL can be formed
+if [[ -n "$INGRESS_ENTRY" ]]; then
+    export MINIO_BROWSER_REDIRECT_URL="http://homeassistant.local:8123${INGRESS_ENTRY}"
+    echo "[INFO] Auto-set MINIO_BROWSER_REDIRECT_URL to ${MINIO_BROWSER_REDIRECT_URL}"
 fi
 
 echo "[INFO] Starting MinIO in Ingress mode"
