@@ -3,19 +3,19 @@ FROM $BUILD_FROM
 
 ENV LANG C.UTF-8
 
-# Required tools
 RUN apk add --no-cache bash curl jq
 
-# Download MinIO binary based on architecture
-ARG TARGETARCH
-RRUN if [ "${TARGETARCH}" = "arm64" ]; then ARCH="arm64"; \
-    elif [ "${TARGETARCH}" = "amd64" ]; then ARCH="amd64"; \
-    else echo "❌ Unsupported architecture: ${TARGETARCH}" && exit 1; fi && \
-    curl -sSLO "https://dl.min.io/server/minio/release/linux-${ARCH}/minio" && \
+# Detect architecture at runtime using uname
+RUN ARCH=$(uname -m) && \
+    case "$ARCH" in \
+      "aarch64") MINIO_ARCH="arm64" ;; \
+      "x86_64")  MINIO_ARCH="amd64" ;; \
+      *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
+    esac && \
+    curl -sSLO "https://dl.min.io/server/minio/release/linux-${MINIO_ARCH}/minio" && \
     chmod +x minio && \
     mv minio /usr/local/bin/
 
-# Add run script
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
