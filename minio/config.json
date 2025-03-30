@@ -36,5 +36,5 @@
     "aarch64",
     "amd64"
   ],
-  "image": "docker.io/minio/minio:latest"
+  "image": "minio/minio:latest"
 }
