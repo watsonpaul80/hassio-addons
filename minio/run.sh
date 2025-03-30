@@ -1,20 +1,23 @@
 #!/usr/bin/env bash
-source /usr/lib/bashio.sh
+set -e
 
-PORT=$(bashio::config 'port')
-CONSOLE_PORT=$(bashio::config 'console_port')
-GEN_KEYS=$(bashio::config 'generate_keys')
-ACCESS_KEY=$(bashio::config 'access_key')
-SECRET_KEY=$(bashio::config 'secret_key')
+CONFIG_PATH=/data/options.json
 
-if bashio::var.true "$GEN_KEYS" || [[ -z "$ACCESS_KEY" || -z "$SECRET_KEY" ]]; then
-    echo "[INFO] Generating access/secret keys..."
-    ACCESS_KEY=$(openssl rand -base64 12 | tr -dc A-Za-z0-9 | head -c 20)
-    SECRET_KEY=$(openssl rand -base64 24 | tr -dc A-Za-z0-9 | head -c 40)
+ACCESS_KEY=$(jq -r '.access_key' "$CONFIG_PATH")
+SECRET_KEY=$(jq -r '.secret_key' "$CONFIG_PATH")
+PORT=$(jq -r '.port' "$CONFIG_PATH")
+CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
+GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
+
+# Auto-generate keys if requested or missing
+if [[ "$GENERATE_KEYS" == "true" || -z "$ACCESS_KEY" || -z "$SECRET_KEY" ]]; then
+    echo "[INFO] Generating random access and secret keys..."
+    ACCESS_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
+    SECRET_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
 fi
 
 export MINIO_ROOT_USER="${ACCESS_KEY}"
 export MINIO_ROOT_PASSWORD="${SECRET_KEY}"
 
-echo "[INFO] Starting MinIO..."
+echo "[INFO] Starting MinIO on port $PORT and console at $CONSOLE_PORT"
 exec minio server /data --address ":${PORT}" --console-address ":${CONSOLE_PORT}"
