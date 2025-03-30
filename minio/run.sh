@@ -18,9 +18,16 @@ fi
 export MINIO_ROOT_USER="${USERNAME}"
 export MINIO_ROOT_PASSWORD="${PASSWORD}"
 
+# Ingress Path Detection (Fallback)
+if [[ -z "$MINIO_BROWSER_REDIRECT_URL" ]]; then
+    INGRESS_SLUG=$(basename "$(dirname "$(realpath "$0")")")
+    export MINIO_BROWSER_REDIRECT_URL="/hassio/ingress/${INGRESS_SLUG}"
+    echo "[INFO] Auto-set MINIO_BROWSER_REDIRECT_URL to $MINIO_BROWSER_REDIRECT_URL"
+fi
+
 echo "[INFO] Starting MinIO in Ingress mode"
 echo "[INFO] Login with username: $USERNAME"
 
 exec minio server /data \
-  --address ":${PORT}" \
-  --console-address ":${CONSOLE_PORT}"
+  --address "127.0.0.1:${PORT}" \
+  --console-address "127.0.0.1:${CONSOLE_PORT}"
