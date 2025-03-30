@@ -9,18 +9,17 @@ PORT=$(jq -r '.port' "$CONFIG_PATH")
 CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
 GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
 
-# Generate random creds if enabled or missing
 if [[ "$GENERATE_KEYS" == "true" && ( -z "$USERNAME" || -z "$PASSWORD" ) ]]; then
     echo "[INFO] Generating random credentials..."
     USERNAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
     PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
 fi
 
-# Export for MinIO to use
 export MINIO_ROOT_USER="${USERNAME}"
 export MINIO_ROOT_PASSWORD="${PASSWORD}"
 
-echo "[INFO] Starting MinIO Console at http://[HOST]:${CONSOLE_PORT}"
+echo "[INFO] Starting MinIO in Ingress mode"
 echo "[INFO] Login with username: $USERNAME"
 
-exec minio server /data --address ":${PORT}" --console-address ":${CONSOLE_PORT}"
+# Bind only to localhost for Ingress
+exec minio server /data --address "127.0.0.1:${PORT}" --console-address "127.0.0.1:${CONSOLE_PORT}"
