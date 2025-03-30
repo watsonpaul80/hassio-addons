@@ -3,22 +3,24 @@ set -e
 
 CONFIG_PATH=/data/options.json
 
-ACCESS_KEY=$(jq -r '.access_key' "$CONFIG_PATH")
-SECRET_KEY=$(jq -r '.secret_key' "$CONFIG_PATH")
+USERNAME=$(jq -r '.username' "$CONFIG_PATH")
+PASSWORD=$(jq -r '.password' "$CONFIG_PATH")
 PORT=$(jq -r '.port' "$CONFIG_PATH")
 CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
 GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
 
-# Generate if needed
-if [[ "$GENERATE_KEYS" == "true" && ( -z "$ACCESS_KEY" || -z "$SECRET_KEY" ) ]]; then
+# Generate random creds if enabled or missing
+if [[ "$GENERATE_KEYS" == "true" && ( -z "$USERNAME" || -z "$PASSWORD" ) ]]; then
     echo "[INFO] Generating random credentials..."
-    ACCESS_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
-    SECRET_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
+    USERNAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
+    PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
 fi
 
 # Export for MinIO to use
-export MINIO_ROOT_USER="${ACCESS_KEY}"
-export MINIO_ROOT_PASSWORD="${SECRET_KEY}"
+export MINIO_ROOT_USER="${USERNAME}"
+export MINIO_ROOT_PASSWORD="${PASSWORD}"
 
-echo "[INFO] Starting MinIO with user: $ACCESS_KEY"
+echo "[INFO] Starting MinIO Console at http://[HOST]:${CONSOLE_PORT}"
+echo "[INFO] Login with username: $USERNAME"
+
 exec minio server /data --address ":${PORT}" --console-address ":${CONSOLE_PORT}"
