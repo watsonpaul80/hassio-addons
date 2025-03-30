@@ -18,12 +18,15 @@ fi
 export MINIO_ROOT_USER="${USERNAME}"
 export MINIO_ROOT_PASSWORD="${PASSWORD}"
 
-# Detect slug from hostname (e.g., addon_dc39b2ea_minio)
-ADDON_SLUG="${HOSTNAME#addon_}"
-export MINIO_BROWSER_REDIRECT_URL="/hassio/ingress/${ADDON_SLUG}"
-echo "[INFO] Auto-set MINIO_BROWSER_REDIRECT_URL to $MINIO_BROWSER_REDIRECT_URL"
+# Optional: auto-detect redirect path
+if [[ -n "$INGRESS_ENTRY" && "$INGRESS_ENTRY" != "null" ]]; then
+  export MINIO_BROWSER_REDIRECT_URL="/hassio/ingress/${HOSTNAME}"
+  echo "[INFO] Auto-set MINIO_BROWSER_REDIRECT_URL to /hassio/ingress/${HOSTNAME}"
+else
+  echo "[INFO] No redirect URL set, skipping MINIO_BROWSER_REDIRECT_URL"
+fi
 
-echo "[INFO] Starting MinIO in Ingress mode"
+echo "[INFO] Starting MinIO"
 echo "[INFO] Login with username: $USERNAME"
 
 exec minio server /data \
