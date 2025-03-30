@@ -41,8 +41,7 @@ map:
   - share:rw
   - media:rw
 
-ports:
-  "9001/tcp": 9001
+ports: {}  # No external ports exposed (Ingress only)
 
 arch:
   - aarch64
