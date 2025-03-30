@@ -1,5 +1,5 @@
 name: MinIO
-version: "1.0.6"
+version: "1.0.7"
 description: High performance, self-hosted S3 storage server for backups and object storage
 slug: minio
 startup: services
@@ -25,6 +25,7 @@ options:
   password: "minio123"
   port: 9000
   console_port: 9001
+  storage_path: "/data/minio"
 
 schema:
   generate_keys: bool
@@ -32,6 +33,7 @@ schema:
   password: str?
   port: int
   console_port: int
+  storage_path: str
 
 map:
   - config:rw
