@@ -1,25 +1,24 @@
-#!/usr/bin/env bash
-set -e
+ARG BUILD_FROM
+FROM $BUILD_FROM
 
-CONFIG_PATH=/data/options.json
+ENV LANG C.UTF-8
 
-USERNAME=$(jq -r '.username' "$CONFIG_PATH")
-PASSWORD=$(jq -r '.password' "$CONFIG_PATH")
-PORT=$(jq -r '.port' "$CONFIG_PATH")
-CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
-GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
+# Required tools
+RUN apk add --no-cache bash curl jq
 
-if [[ "$GENERATE_KEYS" == "true" && ( -z "$USERNAME" || -z "$PASSWORD" ) ]]; then
-    echo "[INFO] Generating random credentials..."
-    USERNAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
-    PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
-fi
+# Download MinIO binary based on architecture
+ARG TARGETARCH
+RUN case "${TARGETARCH}" in \
+    "arm64") ARCH="arm64" ;; \
+    "amd64") ARCH="amd64" ;; \
+    *) echo "❌ Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    curl -sSLO "https://dl.min.io/server/minio/release/linux-${ARCH}/minio" && \
+    chmod +x minio && \
+    mv minio /usr/local/bin/
 
-export MINIO_ROOT_USER="${USERNAME}"
-export MINIO_ROOT_PASSWORD="${PASSWORD}"
+# Add run script
+COPY run.sh /run.sh
+RUN chmod +x /run.sh
 
-echo "[INFO] Starting MinIO in Ingress mode"
-echo "[INFO] Login with username: $USERNAME"
-
-# Bind only to localhost for Ingress
-exec minio server /data --address "127.0.0.1:${PORT}" --console-address "127.0.0.1:${CONSOLE_PORT}"
+CMD [ "/run.sh" ]
