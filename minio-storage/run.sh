@@ -8,7 +8,6 @@ PASSWORD=$(jq -r '.password' "$CONFIG_PATH")
 PORT=$(jq -r '.port' "$CONFIG_PATH")
 CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
 GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
-BROWSER_REDIRECT_URL=$(jq -r '.browser_redirect_url // empty' "$CONFIG_PATH")
 
 if [[ "$GENERATE_KEYS" == "true" && ( -z "$USERNAME" || -z "$PASSWORD" ) ]]; then
     echo "[INFO] Generating random credentials..."
@@ -19,15 +18,12 @@ fi
 export MINIO_ROOT_USER="${USERNAME}"
 export MINIO_ROOT_PASSWORD="${PASSWORD}"
 
-if [[ -n "$BROWSER_REDIRECT_URL" ]]; then
-    echo "[INFO] Setting browser redirect URL to $BROWSER_REDIRECT_URL"
-    export MINIO_BROWSER_REDIRECT_URL="$BROWSER_REDIRECT_URL"
-else
-    # Use safe fallback (external access only)
-    echo "[INFO] No redirect URL set, skipping MINIO_BROWSER_REDIRECT_URL"
-fi
+# Detect slug from hostname (e.g., addon_dc39b2ea_minio)
+ADDON_SLUG="${HOSTNAME#addon_}"
+export MINIO_BROWSER_REDIRECT_URL="/hassio/ingress/${ADDON_SLUG}"
+echo "[INFO] Auto-set MINIO_BROWSER_REDIRECT_URL to $MINIO_BROWSER_REDIRECT_URL"
 
-echo "[INFO] Starting MinIO"
+echo "[INFO] Starting MinIO in Ingress mode"
 echo "[INFO] Login with username: $USERNAME"
 
 exec minio server /data \
