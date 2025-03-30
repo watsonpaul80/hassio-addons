@@ -1,5 +1,5 @@
 name: MinIO
-version: "1.0.7"
+version: "1.0.8"
 description: High performance, self-hosted S3 storage server for backups and object storage
 slug: minio
 startup: services
@@ -33,7 +33,7 @@ schema:
   password: str?
   port: int
   console_port: int
-  storage_path: str
+  storage_path: str?
 
 map:
   - config:rw
