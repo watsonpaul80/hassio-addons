@@ -12,8 +12,8 @@ privileged:
   - SYS_ADMIN
 options:
   generate_keys: true
-  access_key: ""
-  secret_key: ""
+  access_key: "admin"
+  secret_key: "minio123"
   port: 9000
   console_port: 9001
 schema:
@@ -22,6 +22,7 @@ schema:
   secret_key: str?
   port: int
   console_port: int
+image: "quay.io/minio/minio:latest"
 map:
   - config:rw
   - ssl
@@ -41,5 +42,4 @@ arch:
 panel_icon: mdi:server-network
 panel_title: MinIO
 ingress: false
-
-
+webui: http://[HOST]:9001
