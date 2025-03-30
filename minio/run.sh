@@ -1,22 +1,26 @@
-ARG BUILD_FROM
-FROM $BUILD_FROM
+#!/usr/bin/env bash
+set -e
 
-ENV LANG C.UTF-8
+CONFIG_PATH=/data/options.json
 
-RUN apk add --no-cache bash curl jq
+USERNAME=$(jq -r '.username' "$CONFIG_PATH")
+PASSWORD=$(jq -r '.password' "$CONFIG_PATH")
+PORT=$(jq -r '.port' "$CONFIG_PATH")
+CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
+GENERATE_KEYS=$(jq -r '.generate_keys' "$CONFIG_PATH")
 
-# Detect and download MinIO binary based on actual architecture
-RUN sh -c '\
-  ARCH=$(uname -m); \
-  if [ "$ARCH" = "aarch64" ]; then MINIO_ARCH="arm64"; \
-  elif [ "$ARCH" = "x86_64" ]; then MINIO_ARCH="amd64"; \
-  else echo "❌ Unsupported architecture: $ARCH" && exit 1; fi; \
-  echo "✅ Downloading MinIO for $MINIO_ARCH"; \
-  curl -sSLO https://dl.min.io/server/minio/release/linux-${MINIO_ARCH}/minio && \
-  chmod +x minio && \
-  mv minio /usr/local/bin/'
+if [[ "$GENERATE_KEYS" == "true" && ( -z "$USERNAME" || -z "$PASSWORD" ) ]]; then
+    echo "[INFO] Generating random credentials..."
+    USERNAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
+    PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
+fi
 
-COPY run.sh /run.sh
-RUN chmod +x /run.sh
+export MINIO_ROOT_USER="${USERNAME}"
+export MINIO_ROOT_PASSWORD="${PASSWORD}"
 
-CMD [ "/run.sh" ]
+echo "[INFO] Starting MinIO in Ingress mode"
+echo "[INFO] Login with username: $USERNAME"
+
+exec minio server /data \
+  --address "127.0.0.1:${PORT}" \
+  --console-address "127.0.0.1:${CONSOLE_PORT}"
