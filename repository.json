@@ -5,6 +5,6 @@
   "addons": [
     "amazon-s3-backup",
     "telegram_forwarder",
-    "MinIO"
+    "minio"
   ]
 }
