@@ -9,7 +9,7 @@ init: false
 advanced: true
 panel_icon: mdi:server-network
 panel_title: MinIO
-url: "http://[HOST]:[PORT:9001]"
+url: "https://github.com/watsonpaul80/hassio-addons/tree/main/minio"
 
 host_network: false
 homeassistant_api: false
