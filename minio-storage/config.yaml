@@ -1,5 +1,5 @@
 name: MinIO
-version: "1.1.0"
+version: "1.1.1"
 slug: minio
 description: High performance, self-hosted S3 storage server for backups and object storage
 arch:
