@@ -3,43 +3,29 @@ set -e
 
 CONFIG_PATH=/data/options.json
 
-# Load primary login credentials
-USERNAME=$(jq -r '.username // empty' "$CONFIG_PATH")
-PASSWORD=$(jq -r '.password // empty' "$CONFIG_PATH")
-
-# Optional AWS-style access keys (override if provided)
+# Read values from config
 ACCESS_KEY=$(jq -r '.access_key // empty' "$CONFIG_PATH")
 SECRET_KEY=$(jq -r '.secret_key // empty' "$CONFIG_PATH")
-
-# Ports and storage path
-PORT=$(jq -r '.port' "$CONFIG_PATH")
-CONSOLE_PORT=$(jq -r '.console_port' "$CONFIG_PATH")
+PORT=$(jq -r '.port // 9000' "$CONFIG_PATH")
+CONSOLE_PORT=$(jq -r '.console_port // 9001' "$CONFIG_PATH")
 STORAGE_PATH=$(jq -r '.storage_path // "/data/minio"' "$CONFIG_PATH")
-ENABLE_SSL=$(jq -r '.enable_ssl' "$CONFIG_PATH")
 
-# Use access_key/secret_key as override if set
-if [[ -n "$ACCESS_KEY" && -n "$SECRET_KEY" ]]; then
-    echo "[INFO] Using access_key/secret_key as login credentials"
-    USERNAME="$ACCESS_KEY"
-    PASSWORD="$SECRET_KEY"
+# Generate credentials if not provided
+if [[ -z "$ACCESS_KEY" || -z "$SECRET_KEY" ]]; then
+    echo "[INFO] No access/secret key provided, generating random credentials..."
+    ACCESS_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20)
+    SECRET_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 40)
+    echo "[INFO] Generated Access Key: $ACCESS_KEY"
+    echo "[INFO] Generated Secret Key: $SECRET_KEY"
 fi
 
-# Fallback check
-if [[ -z "$USERNAME" || -z "$PASSWORD" ]]; then
-    echo "[ERROR] No valid credentials provided"
-    exit 1
-fi
+# Export required environment variables
+export MINIO_ROOT_USER="${ACCESS_KEY}"
+export MINIO_ROOT_PASSWORD="${SECRET_KEY}"
 
-export MINIO_ROOT_USER="${USERNAME}"
-export MINIO_ROOT_PASSWORD="${PASSWORD}"
-
-# Optional SSL support
-CERTS_FLAG=""
-if [[ "$ENABLE_SSL" == "true" && -d /ssl ]]; then
-    echo "[INFO] SSL enabled with certs in /ssl"
-    CERTS_FLAG="--certs-dir /ssl"
-fi
-
-# Logging startup
 echo "[INFO] Starting MinIO"
-echo "[
+echo "[INFO] Login with username: ${MINIO_ROOT_USER}"
+
+exec minio server "$STORAGE_PATH" \
+  --address "0.0.0.0:${PORT}" \
+  --console-address "0.0.0.0:${CONSOLE_PORT}"
