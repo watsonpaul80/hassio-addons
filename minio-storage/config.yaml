@@ -1,55 +1,52 @@
 name: MinIO
-version: "1.1.1"
+version: "1.1.0"
 slug: minio
 description: High performance, self-hosted S3 storage server for backups and object storage
-url: "https://min.io"
+arch:
+  - aarch64
+  - amd64
 startup: services
 boot: auto
 init: false
 advanced: true
-watchdog: "http://[HOST]:[PORT:9001]/minio/health/live"
-panel_icon: mdi:server-network
-panel_title: MinIO Web Console
 
-host_network: false
-homeassistant_api: false
-hassio_api: false
+ports:
+  "9000/tcp": 9000
+  "9001/tcp": 9001
+ports_description:
+  "9000/tcp": "S3 API endpoint"
+  "9001/tcp": "MinIO Console"
+
+url: "https://github.com/watsonpaul80/hassio-addons/tree/main/minio"
+webui: "http://[HOST]:[PORT:9001]"
+watchdog: "http://[HOST]:[PORT:9001]/minio/health/live"
+
+panel_icon: mdi:server-network
+panel_title: MinIO
+panel_admin: true
+
+map:
+  - config:rw
+  - ssl
+  - addons:rw
+  - backup:rw
+  - share:rw
+  - media:rw
 
 privileged:
   - NET_ADMIN
   - SYS_ADMIN
 
 options:
-  username: "admin"
-  password: "minio123"
   access_key: null
   secret_key: null
   port: 9000
   console_port: 9001
   storage_path: "/data/minio"
-  enable_ssl: false
 
 schema:
-  username: str?
-  password: str?
   access_key: str?
   secret_key: str?
   port: port
   console_port: port
   storage_path: str
-  enable_ssl: bool
-
-map:
-  - config:rw
-  - ssl
-  - share:rw
-  - media:rw
-  - backup:rw
-  - addons:rw
-
-ports:
-  "9001/tcp": 9001
-
-arch:
-  - aarch64
-  - amd64
