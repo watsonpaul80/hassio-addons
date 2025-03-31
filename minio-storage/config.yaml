@@ -38,15 +38,16 @@ privileged:
   - SYS_ADMIN
 
 options:
-  access_key: null
-  secret_key: null
+  access_key: "admin"
+  secret_key: "minio123"
   port: 9000
   console_port: 9001
   storage_path: "/data/minio"
 
 schema:
-  access_key: str?
-  secret_key: str?
-  port: port
-  console_port: port
+  access_key: str
+  secret_key: str
+  port: int
+  console_port: int
   storage_path: str
+
