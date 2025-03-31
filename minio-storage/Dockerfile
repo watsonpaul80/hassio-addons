@@ -3,27 +3,22 @@ FROM $BUILD_FROM
 
 ENV LANG C.UTF-8
 
-ARG TARGETARCH
-
-# Install dependencies and fetch appropriate MinIO binary
+# Install dependencies and fetch MinIO based on detected architecture
 RUN apk add --no-cache bash curl jq && \
-    case "$TARGETARCH" in \
-      "arm64") ARCH="arm64" ;; \
-      "amd64") ARCH="amd64" ;; \
-      *) echo "❌ Unsupported architecture: $TARGETARCH" && exit 1 ;; \
-    esac && \
+    ARCH=$(uname -m) && \
+    if [ "$ARCH" = "aarch64" ]; then ARCH="arm64"; \
+    elif [ "$ARCH" = "x86_64" ]; then ARCH="amd64"; \
+    else echo "❌ Unsupported architecture: $ARCH" && exit 1; fi && \
     echo "✅ Downloading MinIO for $ARCH" && \
     curl -sSLO "https://dl.min.io/server/minio/release/linux-${ARCH}/minio" && \
     chmod +x minio && \
     mv minio /usr/local/bin/minio
 
-# Copy run script and optional MinIO Client (mc)
 COPY run.sh /run.sh
 COPY mc /usr/bin/mc
 
 RUN chmod +x /run.sh /usr/bin/mc
 
-# Add optional SSL support by copying certificates if enabled
 COPY certs/ /etc/ssl/certs/
 
 HEALTHCHECK CMD curl --fail http://localhost:9001/minio/health/live || exit 1
